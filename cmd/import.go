@@ -96,6 +96,10 @@ func importRun(cmd *cobra.Command, args []string) {
 	for scanner.Scan() {
 		var doc = make(map[string]interface{})
 		json.Unmarshal(scanner.Bytes(), &doc)
+
+		// remove _version_ if exists
+		delete(doc, "_version_")
+
 		bufCh <- doc
 	}
 	if err := scanner.Err(); err != nil {
