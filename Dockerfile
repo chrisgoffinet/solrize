@@ -1,11 +1,9 @@
-FROM golang:latest as builder
-RUN go get -u github.com/golang/dep/...
+FROM golang:1.11beta2 as builder
 ENV WORKDIR /go/src/github.com/chrisgoffinet/solrize
 WORKDIR ${WORKDIR}
-COPY Gopkg.toml Gopkg.lock ./
-RUN dep ensure --vendor-only
 
 COPY . ${WORKDIR}
+ENV GO111MODULE on
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app
 
 FROM alpine:latest
