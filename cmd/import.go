@@ -92,18 +92,20 @@ func importRun(cmd *cobra.Command, args []string) {
 	bufCh := make(chan map[string]interface{}, batchSize)
 	go worker(&url, wg, bufCh, batchSize)
 
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
+	reader := bufio.NewReader(file)
+	var line string
+	for {
+		line, err = reader.ReadString('\n')
+		if err != nil {
+			break
+		}
 		var doc = make(map[string]interface{})
-		json.Unmarshal(scanner.Bytes(), &doc)
+		json.Unmarshal([]byte(line), &doc)
 
 		// remove _version_ if exists
 		delete(doc, "_version_")
 
 		bufCh <- doc
-	}
-	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
 	}
 	close(bufCh)
 	wg.Wait()
